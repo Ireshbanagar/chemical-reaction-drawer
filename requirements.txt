@@ -12,3 +12,6 @@ mypy>=1.0.0
 # PyOpenGL>=3.1.0  # For 3D visualization
 # tkinter  # Built into Python for GUI
 # Pillow>=9.0.0  # For image export
+
+# AI features
+boto3>=1.26.0  # For Amazon Bedrock integration

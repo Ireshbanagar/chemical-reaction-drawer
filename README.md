@@ -4,6 +4,14 @@ A comprehensive Python-based chemical structure drawing and visualization applic
 
 ## Features
 
+### 🤖 AI-Powered Molecule Generation (NEW!)
+- **Generate from Name**: Type molecule names, get instant structures
+- **Amazon Bedrock Integration**: Powered by Claude 3.5 Sonnet
+- **Fallback Mode**: Works offline with 17 common molecules
+- **Smart Caching**: Fast repeated queries
+- **One-Click Addition**: Add generated molecules directly to canvas
+- **Keyboard Shortcut**: Ctrl+G for instant access
+
 ### Core Chemical Drawing
 - **Atom Placement**: Click-to-place atoms with element selection
 - **Bond Creation**: Multiple bond types (single, double, triple, wedge, dashed, wavy)
@@ -63,7 +71,35 @@ pip install -r requirements.txt
 - `dataclasses` - Data structure support
 - `typing` - Type hints support
 
+### Optional (for AI features)
+- `boto3` - Amazon Bedrock integration (optional, works without it)
+
 ## Quick Start
+
+### AI-Powered Molecule Generation (NEW!)
+```python
+from chemical_reaction_drawer.ai import AIAssistant
+
+# Initialize AI Assistant
+assistant = AIAssistant()
+
+# Generate molecule from name
+molecule = assistant.generate_from_name("aspirin")
+print(f"Formula: {molecule.get_molecular_formula()}")
+print(f"Atoms: {len(molecule.atoms)}")
+print(f"Bonds: {len(molecule.bonds)}")
+
+# Works with common molecules even without AWS
+molecule = assistant.generate_from_name("caffeine")
+```
+
+**GUI Usage:**
+1. Press **Ctrl+G** to open AI Assistant
+2. Type molecule name (e.g., "aspirin", "caffeine", "benzene")
+3. Click **Generate**
+4. Click **Add to Canvas**
+
+See [AI_QUICK_START.md](AI_QUICK_START.md) for detailed guide.
 
 ### Basic Molecule Creation
 ```python
@@ -117,6 +153,10 @@ if not validation_result.is_valid:
 
 The application follows a modular architecture with clear separation of concerns:
 
+- **AI System** (`ai/`): Amazon Bedrock integration and molecule generation
+  - `bedrock_client.py`: AWS Bedrock API client
+  - `molecule_generator.py`: SMILES parser and molecule generation
+  - `ai_assistant.py`: High-level AI interface
 - **Core Models** (`models.py`): Fundamental data structures (Atom, Bond, Molecule)
 - **Chemical Engine** (`chemistry.py`): Validation and chemical intelligence
 - **3D System** (`molecule_3d.py`, `renderer_3d.py`): 3D visualization and interaction
@@ -163,6 +203,10 @@ The project includes 24 comprehensive property-based tests that verify correctne
 ### Project Structure
 ```
 chemical_reaction_drawer/
+├── ai/                      # AI integration (NEW!)
+│   ├── bedrock_client.py   # AWS Bedrock client
+│   ├── molecule_generator.py # SMILES parser
+│   └── ai_assistant.py     # AI interface
 ├── core/                    # Core modules
 │   ├── models.py           # Basic data structures
 │   ├── chemistry.py        # Chemical intelligence
@@ -172,6 +216,10 @@ chemical_reaction_drawer/
 │   ├── styling.py          # Visual styling system
 │   ├── templates.py        # Template library
 │   └── template_placement.py # Template placement logic
+├── gui/                     # GUI components
+│   ├── main_window.py      # Main application window
+│   ├── ai_dialog.py        # AI Assistant dialog (NEW!)
+│   └── ...
 ├── tests/                   # Test suite
 └── .kiro/specs/            # Design specifications
 ```
@@ -208,3 +256,10 @@ MIT License - see LICENSE file for details.
 - Extensive property-based testing with Hypothesis
 - OpenGL-based 3D rendering for high performance
 - Chemical intelligence based on established chemical rules
+- AI-powered features using Amazon Bedrock and Claude 3.5 Sonnet
+
+## Documentation
+
+- [AI Quick Start Guide](AI_QUICK_START.md) - Get started with AI features
+- [AI Integration Summary](AI_INTEGRATION_SUMMARY.md) - Technical details of AI implementation
+- [Specifications](.kiro/specs/chemical-reaction-drawer/) - Complete design specifications
