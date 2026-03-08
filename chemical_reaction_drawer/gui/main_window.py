@@ -14,6 +14,8 @@ from pathlib import Path
 from .drawing_canvas import DrawingCanvas
 from .toolbar import ToolBar
 from .tool_palette import ToolPalette
+from .enhanced_tools import EnhancedToolManager, ToolType
+from .enhanced_tool_palette import EnhancedToolPalette, CompactToolPalette
 from ..core.models import Molecule
 from ..core.file_io import ChemicalFileManager, FileFormat
 from ..core.styling import StyleManager
@@ -54,11 +56,13 @@ class ChemicalDrawerApp:
         self.template_library = TemplateLibrary()
         self.reaction_manager = ReactionManager()
         self.ai_assistant = AIAssistant()  # AI features
+        self.tool_manager = EnhancedToolManager()  # Enhanced tools
         
         # GUI components
         self.canvas = None
         self.toolbar = None
         self.tool_palette = None
+        self.enhanced_tool_palette = None
         self.status_bar = None
         
         # Initialize GUI with error handling
@@ -80,17 +84,28 @@ class ChemicalDrawerApp:
         main_frame = ttk.Frame(self.root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # Create toolbar
-        self.toolbar = ToolBar(main_frame, self)
-        self.toolbar.pack(side=tk.TOP, fill=tk.X, pady=(0, 5))
+        # Create toolbar with compact tools
+        toolbar_frame = ttk.Frame(main_frame)
+        toolbar_frame.pack(side=tk.TOP, fill=tk.X, pady=(0, 5))
+        
+        self.toolbar = ToolBar(toolbar_frame, self)
+        self.toolbar.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # Add compact tool palette to toolbar
+        compact_tools = CompactToolPalette(toolbar_frame, self, self.tool_manager)
+        compact_tools.pack(side=tk.RIGHT, padx=(5, 0))
         
         # Create content frame
         content_frame = ttk.Frame(main_frame)
         content_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Create tool palette (left side)
+        # Create enhanced tool palette (left side) - scrollable
+        self.enhanced_tool_palette = EnhancedToolPalette(content_frame, self, self.tool_manager)
+        self.enhanced_tool_palette.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 5))
+        
+        # Keep old tool palette for compatibility (hidden by default)
         self.tool_palette = ToolPalette(content_frame, self)
-        self.tool_palette.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 5))
+        # Don't pack it - we're using enhanced palette instead
         
         # Create canvas frame
         canvas_frame = ttk.Frame(content_frame)
@@ -103,7 +118,7 @@ class ChemicalDrawerApp:
         # Create status bar
         self.status_bar = ttk.Label(
             main_frame, 
-            text="Ready", 
+            text="Ready - Enhanced Tools Loaded", 
             relief=tk.SUNKEN,
             anchor=tk.W
         )
@@ -485,6 +500,17 @@ class ChemicalDrawerApp:
         # Update tool palette selection
         if self.tool_palette:
             self.tool_palette.set_active_tool(tool_name)
+    
+    def on_tool_changed(self, tool_type: ToolType):
+        """Handle tool change from enhanced tool palette."""
+        # Update canvas tool
+        if self.canvas and hasattr(self.canvas, 'set_enhanced_tool'):
+            self.canvas.set_enhanced_tool(tool_type)
+        
+        # Update status
+        config = self.tool_manager.get_tool_config(tool_type)
+        if config:
+            self.set_status(f"Tool: {config.display_name}")
     
     def show_template_library(self):
         """Show the template library dialog."""
